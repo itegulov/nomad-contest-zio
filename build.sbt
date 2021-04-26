@@ -28,6 +28,7 @@ lazy val root = project
       "org.http4s"            %% "http4s-dsl"          % http4sVersion,
       "org.http4s"            %% "http4s-circe"        % http4sVersion,
       "io.circe"              %% "circe-core"          % circeVersion,
+      "io.circe"              %% "circe-parser"        % circeVersion,
       "io.circe"              %% "circe-generic"       % circeVersion,
       "com.github.jwt-scala"  %% "jwt-core"            % jwtScalaVersion,
       "com.github.pureconfig" %% "pureconfig-core"     % "0.15.1-SNAPSHOT",

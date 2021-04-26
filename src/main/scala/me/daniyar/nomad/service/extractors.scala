@@ -6,4 +6,4 @@ import scala.util.Try
 
 object UserIdVar:
   def unapply(str: String): Option[UserId] =
-    Try(UserId(str.toLong)).toOption
+    str.toLongOption.map(UserId.apply)

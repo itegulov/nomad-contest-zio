@@ -1,6 +1,7 @@
 package me.daniyar.nomad.service
 
 import io.circe._
+import io.circe.parser._
 import me.daniyar.nomad.repository.UserRepository
 import me.daniyar.nomad.service.userServices
 import org.http4s._
@@ -62,6 +63,44 @@ object UserServicesSpec extends DefaultRunnableSpec:
           isValidJwt
         )
       },
+      testM("should not sign in with incorrect email") {
+        val signUpReq = request[UserTask](Method.POST, "/signup").withEntity(testUserJson)
+        val signInReq = request[UserTask](Method.POST, "/login").withEntity(
+          s"""{
+             |  "email": "test@nottest.com",
+             |  "password": "$testUserPassword"
+             |}""".stripMargin
+        )
+        val zio       = for {
+          _        <- app.run(signUpReq)
+          response <- app.run(signInReq)
+        } yield response
+
+        checkRequestEquals[UserRepository, String](
+          zio,
+          Status.BadRequest,
+          "Invalid username/password"
+        )
+      },
+      testM("should not sign in with incorrect password") {
+        val signUpReq = request[UserTask](Method.POST, "/signup").withEntity(testUserJson)
+        val signInReq = request[UserTask](Method.POST, "/login").withEntity(
+          s"""{
+             |  "email": "$testUserEmail",
+             |  "password": "123"
+             |}""".stripMargin
+        )
+        val zio       = for {
+          _        <- app.run(signUpReq)
+          response <- app.run(signInReq)
+        } yield response
+
+        checkRequestEquals[UserRepository, String](
+          zio,
+          Status.BadRequest,
+          "Invalid username/password"
+        )
+      },
       testM("should not allow signing up twice") {
         val signUpReq = request[UserTask](Method.POST, "/signup").withEntity(testUserJson)
         val zio       = for {
@@ -73,6 +112,28 @@ object UserServicesSpec extends DefaultRunnableSpec:
           zio,
           Status.BadRequest,
           s"Email ${testUserEmail} is taken"
+        )
+      },
+      testM("should find a signed up user by their id") {
+        val zio = for {
+          signUpRespR <- app.run(request[UserTask](Method.POST, "/signup").withEntity(testUserJson))
+          signUpResp  <- signUpRespR.as[String]
+          jwt          = Jwt.decode(signUpResp)
+          userId       = Jwt.decode(signUpResp).toOption.flatMap(_.jwtId).get
+          findReq     <- app.run(request[UserTask](Method.GET, s"/$userId"))
+        } yield findReq
+
+        checkRequestEquals[UserRepository, Json](
+          zio,
+          Status.Ok,
+          parse(
+            s"""{
+               |  "id": 1,
+               |  "firstName": "TestFirstName",
+               |  "lastName": "TestLastName",
+               |  "email": "$testUserEmail"
+               |}""".stripMargin
+          ).toOption.get
         )
       }
     ).provideSomeLayer[ZEnv](testLayers.live.testLayer)

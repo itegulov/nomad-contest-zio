@@ -27,7 +27,7 @@ def checkRequest[R, A](
 def checkRequestEquals[R, A](
   actual: RIO[R, Response[RIO[R, *]]],
   expectedStatus: Status,
-  expectedBody: String
+  expectedBody: A
 )(implicit
   ev: EntityDecoder[RIO[R, *], A]
 ): RIO[R, TestResult] = checkRequest(actual, expectedStatus, equalTo(expectedBody))

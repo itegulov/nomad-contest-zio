@@ -18,7 +18,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.dsl.Http4sDsl
-import pdi.jwt.Jwt
+import pdi.jwt.{Jwt, JwtClaim}
 import zio.{RIO, Task, ZIO}
 import zio.interop.catz._
 
@@ -31,7 +31,8 @@ def userServices[R <: UserRepository]: HttpRoutes[RIO[R, *]] =
   import dsl._
 
   def generateTokenResult(user: User): String =
-    Jwt.encode(s"""{"user": ${user.id.get.value}""")
+    val jwt = JwtClaim(jwtId = Some(user.id.get.value.toString))
+    Jwt.encode(jwt.toJson)
 
   val userFind = HttpRoutes.of[UserTask] { case GET -> Root / UserIdVar(id) =>
     val zio = for {
