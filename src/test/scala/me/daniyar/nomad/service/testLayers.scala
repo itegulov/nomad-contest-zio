@@ -1,15 +1,16 @@
 package me.daniyar.nomad.service
 
 import me.daniyar.nomad.config.DatabaseConfig
-import me.daniyar.nomad.repository.UserRepository
+import me.daniyar.nomad.repository.{JwtRepository, UserRepository}
 import me.daniyar.nomad.testing.{PostgresqlDocker, TestContainersDatabaseConfig}
 import me.daniyar.nomad.util.Transactor
 import zio.{ZEnv, ZLayer}
 import zio.blocking.Blocking
+import zio.random._
 
 object testLayers:
   type Layer0Env =
-    Blocking with PostgresqlDocker
+    Blocking with Random with PostgresqlDocker
 
   type Layer1Env =
     Layer0Env with DatabaseConfig
@@ -18,13 +19,13 @@ object testLayers:
     Layer1Env with Transactor
 
   type Layer3Env =
-    UserRepository
+    Random with UserRepository with JwtRepository
 
   type TestEnv = Layer3Env
 
   object live:
     val layer0: ZLayer[Blocking, Nothing, Layer0Env] =
-      Blocking.any ++ PostgresqlDocker.live
+      Blocking.any ++ Random.live ++ PostgresqlDocker.live
 
     val layer1: ZLayer[Layer0Env, Nothing, Layer1Env] =
       ZLayer.identity ++ TestContainersDatabaseConfig.test
@@ -33,7 +34,7 @@ object testLayers:
       ZLayer.identity[Layer1Env] ++ Transactor.fromDatabaseConfig.orDie
 
     val layer3: ZLayer[Layer2Env, Nothing, Layer3Env] =
-      UserRepository.layer
+      Random.any ++ UserRepository.layer ++ JwtRepository.layer
 
     val testLayer: ZLayer[Blocking, Nothing, TestEnv] =
       layer0 >>> layer1 >>> layer2 >>> layer3

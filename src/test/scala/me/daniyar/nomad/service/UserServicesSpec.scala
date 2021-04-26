@@ -2,7 +2,7 @@ package me.daniyar.nomad.service
 
 import io.circe._
 import io.circe.parser._
-import me.daniyar.nomad.repository.UserRepository
+import me.daniyar.nomad.repository.{JwtRepository, UserRepository}
 import me.daniyar.nomad.service.userServices
 import org.http4s._
 import org.http4s.circe._
@@ -13,9 +13,13 @@ import zio._
 import zio.interop.catz._
 import zio.test._
 import zio.test.Assertion._
+import zio.random._
 
 object UserServicesSpec extends DefaultRunnableSpec:
-  type UserTask[A] = RIO[UserRepository, A]
+  type UserEnv = UserRepository with JwtRepository with Random
+  type UserTask[A] = RIO[UserEnv, A]
+
+  implicit val charset: Charset = Charset.`UTF-8`
 
   val app = Router[UserTask]("/" -> userServices).orNotFound
 
@@ -76,7 +80,7 @@ object UserServicesSpec extends DefaultRunnableSpec:
           response <- app.run(signInReq)
         } yield response
 
-        checkRequestEquals[UserRepository, String](
+        checkRequestEquals[UserEnv, String](
           zio,
           Status.BadRequest,
           "Invalid username/password"
@@ -95,7 +99,7 @@ object UserServicesSpec extends DefaultRunnableSpec:
           response <- app.run(signInReq)
         } yield response
 
-        checkRequestEquals[UserRepository, String](
+        checkRequestEquals[UserEnv, String](
           zio,
           Status.BadRequest,
           "Invalid username/password"
@@ -108,7 +112,7 @@ object UserServicesSpec extends DefaultRunnableSpec:
           response <- app.run(signUpReq)
         } yield response
 
-        checkRequestEquals[UserRepository, String](
+        checkRequestEquals[UserEnv, String](
           zio,
           Status.BadRequest,
           s"Email ${testUserEmail} is taken"
@@ -123,7 +127,7 @@ object UserServicesSpec extends DefaultRunnableSpec:
           findReq     <- app.run(request[UserTask](Method.GET, s"/$userId"))
         } yield findReq
 
-        checkRequestEquals[UserRepository, Json](
+        checkRequestEquals[UserEnv, Json](
           zio,
           Status.Ok,
           parse(
