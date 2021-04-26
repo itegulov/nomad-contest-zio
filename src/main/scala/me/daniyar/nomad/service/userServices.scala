@@ -15,13 +15,14 @@ import org.http4s.dsl.Http4sDsl
 import pdi.jwt.{Jwt, JwtClaim}
 import zio.{RIO, Task, ZIO}
 import zio.interop.catz._
+import zio.logging._
 import zio.random._
 
 import java.time.Instant
 import java.util.UUID
 import scala.util.Try
 
-def userServices[R <: UserRepository with JwtRepository with Random]: HttpRoutes[RIO[R, *]] =
+def userServices[R <: UserRepository with JwtRepository with Random with Logging]: HttpRoutes[RIO[R, *]] =
   type UserTask[A] = RIO[R, A]
 
   val dsl = Http4sDsl[UserTask]
@@ -43,7 +44,8 @@ def userServices[R <: UserRepository with JwtRepository with Random]: HttpRoutes
     } yield result
 
     zio.catchAll { case dbException: DbException =>
-      InternalServerError()
+      log.throwable("Database error", dbException) *>
+        InternalServerError()
     }
   }
 
@@ -59,7 +61,8 @@ def userServices[R <: UserRepository with JwtRepository with Random]: HttpRoutes
       case e: EmailIsTakenException =>
         BadRequest(s"Email ${e.email} is taken")
       case dbException: DbException =>
-        InternalServerError()
+        log.throwable("Database error", dbException) *>
+          InternalServerError()
     }
   }
 
@@ -75,7 +78,8 @@ def userServices[R <: UserRepository with JwtRepository with Random]: HttpRoutes
       case e: (UserNotFoundException | InvalidPasswordException) =>
         BadRequest("Invalid username/password")
       case dbException: DbException                              =>
-        InternalServerError()
+        log.throwable("Database error", dbException) *>
+          InternalServerError()
     }
   }
 

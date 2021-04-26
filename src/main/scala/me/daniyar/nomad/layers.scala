@@ -6,11 +6,13 @@ import me.daniyar.nomad.util.Transactor
 import zio.ZLayer
 import zio.blocking.Blocking
 import zio.clock.Clock
+import zio.logging.Logging
+import zio.logging.slf4j.Slf4jLogger
 import zio.random._
 
 object layers:
   type Layer0Env =
-    Blocking with Clock with Random with NomadConfig
+    Blocking with Clock with Random with Logging with NomadConfig
 
   type Layer1Env =
     Layer0Env with HttpConfig with DatabaseConfig
@@ -25,7 +27,8 @@ object layers:
 
   object live:
     val layer0: ZLayer[Blocking, Throwable, Layer0Env] =
-      Blocking.any ++ Clock.live ++ Random.live ++ NomadConfig.live
+      Blocking.any ++ Clock.live ++ Random.live ++
+        Slf4jLogger.make((_, msg) => msg) ++ NomadConfig.live
 
     val layer1: ZLayer[Layer0Env, Throwable, Layer1Env] =
       ZLayer.identity[Layer0Env] ++ HttpConfig.fromNomadConfig ++ DatabaseConfig.fromNomadConfig

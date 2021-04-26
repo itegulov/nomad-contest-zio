@@ -1,4 +1,5 @@
 val zioVersion = "1.0.6"
+val zioLogging = "0.5.8+10-2942bbe2+20210426-2227-SNAPSHOT"
 val doobieVersion = "0.13.0"
 val http4sVersion = "0.22.0-M7"
 val circeVersion = "0.14.0-M5"
@@ -20,6 +21,8 @@ lazy val root = project
     libraryDependencies ++= Seq(
       "dev.zio"               %% "zio"                 % zioVersion,
       "dev.zio"               %% "zio-streams"         % zioVersion,
+      "dev.zio"               %% "zio-logging"         % zioLogging,
+      "dev.zio"               %% "zio-logging-slf4j"   % zioLogging,
       "dev.zio"               %% "zio-interop-cats"    % "2.4.1.0",
       "org.tpolecat"          %% "doobie-core"         % doobieVersion,
       "org.tpolecat"          %% "doobie-postgres"     % doobieVersion,

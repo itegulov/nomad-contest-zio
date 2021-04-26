@@ -6,6 +6,8 @@ import me.daniyar.nomad.testing.{PostgresqlDocker, TestContainersDatabaseConfig}
 import me.daniyar.nomad.util.Transactor
 import zio.{ZEnv, ZLayer}
 import zio.blocking.Blocking
+import zio.logging.Logging
+import zio.logging.slf4j.Slf4jLogger
 import zio.random._
 
 object testLayers:
@@ -19,7 +21,7 @@ object testLayers:
     Layer1Env with Transactor
 
   type Layer3Env =
-    Random with UserRepository with JwtRepository
+    Random with Logging with UserRepository with JwtRepository
 
   type TestEnv = Layer3Env
 
@@ -34,7 +36,7 @@ object testLayers:
       ZLayer.identity[Layer1Env] ++ Transactor.fromDatabaseConfig.orDie
 
     val layer3: ZLayer[Layer2Env, Nothing, Layer3Env] =
-      Random.any ++ UserRepository.layer ++ JwtRepository.layer
+      Random.any ++ Slf4jLogger.make((_, msg) => msg) ++ UserRepository.layer ++ JwtRepository.layer
 
     val testLayer: ZLayer[Blocking, Nothing, TestEnv] =
       layer0 >>> layer1 >>> layer2 >>> layer3

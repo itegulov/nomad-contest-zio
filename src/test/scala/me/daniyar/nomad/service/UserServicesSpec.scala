@@ -11,12 +11,13 @@ import org.http4s.server.Router
 import pdi.jwt.Jwt
 import zio._
 import zio.interop.catz._
+import zio.logging.Logging
 import zio.test._
 import zio.test.Assertion._
 import zio.random._
 
 object UserServicesSpec extends DefaultRunnableSpec:
-  type UserEnv = UserRepository with JwtRepository with Random
+  type UserEnv = UserRepository with JwtRepository with Random with Logging
   type UserTask[A] = RIO[UserEnv, A]
 
   implicit val charset: Charset = Charset.`UTF-8`
