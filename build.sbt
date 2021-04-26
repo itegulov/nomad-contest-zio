@@ -3,6 +3,7 @@ val doobieVersion = "0.13.0"
 val http4sVersion = "0.22.0-M7"
 val circeVersion = "0.14.0-M5"
 val jwtScalaVersion = "7.1.3"
+val testcontainersVersion = "0.39.4-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -14,6 +15,7 @@ lazy val root = project
     scalacOptions ++= Seq(
       "-Ykind-projector"
     ),
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
 
     libraryDependencies ++= Seq(
       "dev.zio"               %% "zio"                 % zioVersion,
@@ -31,7 +33,13 @@ lazy val root = project
       "com.github.pureconfig" %% "pureconfig-core"     % "0.15.1-SNAPSHOT",
       "org.flywaydb"          % "flyway-core"          % "7.8.1",
       "org.mindrot"           % "jbcrypt"              % "0.4",
-      "ch.qos.logback"        % "logback-classic"      % "1.2.3",
-      "com.novocode"          % "junit-interface"      % "0.11" % Test
+      "ch.qos.logback"        % "logback-classic"      % "1.2.3"
+    ),
+    libraryDependencies ++= Seq(
+      "com.novocode" % "junit-interface"                  % "0.11" % Test,
+      "dev.zio"      %% "zio-test"                        % zioVersion % Test,
+      "dev.zio"      %% "zio-test-sbt"                    % zioVersion % Test,
+      "com.dimafeng" %% "testcontainers-scala-scalatest"  % testcontainersVersion % Test,
+      "com.dimafeng" %% "testcontainers-scala-postgresql" % testcontainersVersion % Test
     )
   )
