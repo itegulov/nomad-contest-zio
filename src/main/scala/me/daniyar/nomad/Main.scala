@@ -9,7 +9,7 @@ import me.daniyar.nomad.util.Transactor
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.server.Router
-import org.http4s.server.blaze._
+import org.http4s.blaze.server._
 import org.http4s.server.middleware._
 import zio.{RIO, ZEnv, ZIO, ExitCode => ZExitCode}
 import zio.clock.Clock

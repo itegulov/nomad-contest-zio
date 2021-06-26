@@ -1,10 +1,11 @@
-val zioVersion = "1.0.6"
-val zioLogging = "0.5.8+10-2942bbe2+20210426-2227-SNAPSHOT"
-val doobieVersion = "0.13.0"
-val http4sVersion = "0.22.0-M7"
-val circeVersion = "0.14.0-M5"
-val jwtScalaVersion = "7.1.3"
-val testcontainersVersion = "0.39.4-SNAPSHOT"
+val zioVersion = "1.0.9"
+val zioLogging = "0.5.11"
+val doobieVersion = "0.13.3"
+val http4sVersion = "0.22.0-RC1"
+val circeVersion = "0.14.0-M7"
+val jwtScalaVersion = "7.1.5"
+val pureconfigVersion = "0.16.0"
+val testcontainersVersion = "0.39.5"
 
 lazy val root = project
   .in(file("."))
@@ -12,7 +13,7 @@ lazy val root = project
     name := "nomad-contest-zio",
     version := "0.1.0",
 
-    scalaVersion := "3.0.0-RC2",
+    scalaVersion := "3.0.0",
     scalacOptions ++= Seq(
       "-Ykind-projector"
     ),
@@ -23,7 +24,7 @@ lazy val root = project
       "dev.zio"               %% "zio-streams"         % zioVersion,
       "dev.zio"               %% "zio-logging"         % zioLogging,
       "dev.zio"               %% "zio-logging-slf4j"   % zioLogging,
-      "dev.zio"               %% "zio-interop-cats"    % "2.4.1.0",
+      "dev.zio"               %% "zio-interop-cats"    % "2.5.1.0",
       "org.tpolecat"          %% "doobie-core"         % doobieVersion,
       "org.tpolecat"          %% "doobie-postgres"     % doobieVersion,
       "org.tpolecat"          %% "doobie-hikari"       % doobieVersion,
@@ -34,7 +35,7 @@ lazy val root = project
       "io.circe"              %% "circe-parser"        % circeVersion,
       "io.circe"              %% "circe-generic"       % circeVersion,
       "com.github.jwt-scala"  %% "jwt-core"            % jwtScalaVersion,
-      "com.github.pureconfig" %% "pureconfig-core"     % "0.15.1-SNAPSHOT",
+      "com.github.pureconfig" %% "pureconfig-core"     % pureconfigVersion,
       "org.flywaydb"          % "flyway-core"          % "7.8.1",
       "org.mindrot"           % "jbcrypt"              % "0.4",
       "ch.qos.logback"        % "logback-classic"      % "1.2.3"
